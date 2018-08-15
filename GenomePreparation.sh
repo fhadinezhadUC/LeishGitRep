@@ -23,5 +23,5 @@ for i in $(find "$path" -name "fasta" -type d); do
 done
 # after downloading the files, extract all the file with the pattern "*_Genome.fasta" and redirect them to the folder "$path"
 find "$path" -name "*_Genome.fasta" -exec cp {} "$path" \;
-find /home/fatemeh/Leishmania_Aug2018/tritrypdb.org/ -name "*_Genome.fasta" -exec cp {} /home/fatemeh/Leishmania_Aug2018/tritrypdb.org/ \;
+#find /home/fatemeh/Leishmania_Aug2018/tritrypdb.org/ -name "*_Genome.fasta" -exec cp {} /home/fatemeh/Leishmania_Aug2018/tritrypdb.org/ \;
 
