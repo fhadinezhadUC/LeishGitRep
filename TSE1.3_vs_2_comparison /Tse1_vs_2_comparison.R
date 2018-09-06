@@ -53,13 +53,6 @@ Tse1.3_VS_2_Comparison <- function() {
   }
   
   
-  visualize(tse1df, tse2df)
-  
-  
-}
-
-visualize <- function(tse1df, tse2df) {
-  
   tse1df$tsesourceseq <- as.character(tse1df$tsesourceseq)
   tse2df$tsesourceseq <- as.character(tse2df$tsesourceseq)
   tse1df$tsebegin <- as.integer(as.character(tse1df$tsebegin))
@@ -74,6 +67,31 @@ visualize <- function(tse1df, tse2df) {
   tse2df$tsesourceseq <- factor(tse2df$tsesourceseq)
   tse1df$tsesourceseq = as.character(tse1df$tsesourceseq)
   tse2df$tsesourceseq = as.character(tse2df$tsesourceseq)
+  
+  coordinateDisplacement(tse1df, tse2df)
+  
+  
+  visualize(tse1df, tse2df)
+  
+  
+}
+
+visualize <- function(tse1df, tse2df) {
+  
+  # tse1df$tsesourceseq <- as.character(tse1df$tsesourceseq)
+  # tse2df$tsesourceseq <- as.character(tse2df$tsesourceseq)
+  # tse1df$tsebegin <- as.integer(as.character(tse1df$tsebegin))
+  # tse2df$tsebegin <- as.integer(as.character(tse2df$tsebegin))
+  # tse1df$tseend <- as.integer(as.character(tse1df$tseend))
+  # tse2df$tseend <- as.integer(as.character(tse2df$tseend))
+  # tse1df$tsedirection <- factor(tse1df$tsedirection)
+  # tse2df$tsedirection <- factor(tse2df$tsedirection)
+  # tse1df$tsedirection = as.character(tse1df$tsedirection)
+  # tse2df$tsedirection = as.character(tse2df$tsedirection)
+  # tse1df$tsesourceseq <- factor(tse1df$tsesourceseq)
+  # tse2df$tsesourceseq <- factor(tse2df$tsesourceseq)
+  # tse1df$tsesourceseq = as.character(tse1df$tsesourceseq)
+  # tse2df$tsesourceseq = as.character(tse2df$tsesourceseq)
   
   #################################################################################################################
   # venn diagram for 4 sets of genes from tse1 and tse2
@@ -170,17 +188,17 @@ findoverlapdf <- function(tse1df, tse2df) {
     )
   
   overlaps <- as.data.frame(findOverlaps(tse1, tse2))
-  Exactmatch <-
-    as.data.frame(findOverlaps(tse1, tse2), type = "equal")
-  
-  sprintf("Total number of nonpseudo-genes found by TSE2.0 is: %d",
-          nrow(tse2df))
-  sprintf("total number of nonpseudo-genes found by TSE1.3 is: %d",
-          nrow(tse1df))
-  sprintf("total number of nonpseudo-genes found by both is: %d",
-          nrow(overlaps))
-  if (nrow(overlaps) == nrow(Exactmatch))
-    print("genes found by both TSE1.3 and TSE2.0 have exact same coordinate.")
+  # Exactmatch <-
+  #   as.data.frame(findOverlaps(tse1, tse2), type = "equal")
+  # 
+  # sprintf("Total number of nonpseudo-genes found by TSE2.0 is: %d",
+  #         nrow(tse2df))
+  # sprintf("total number of nonpseudo-genes found by TSE1.3 is: %d",
+  #         nrow(tse1df))
+  # sprintf("total number of nonpseudo-genes found by both is: %d",
+  #         nrow(overlaps))
+  # if (nrow(overlaps) == nrow(Exactmatch))
+  #   print("genes found by both TSE1.3 and TSE2.0 have exact same coordinate.")
   
   # compare the score of the common found genes. using their coordinate
   
@@ -337,6 +355,78 @@ making_tse_df <- function(tse_filename, tse_ss_filename) {
   geneinfo
 }
 
+coordinateDisplacement <- function(tse1df, tse2df){
+  
+  ispseudo1 <- tse1df$note == "pseudo"
+  ispseudo2 <- tse2df$note == "pseudo"
+  pseudodf1 <- tse1df[ispseudo1, ]
+  pseudodf2 <- tse2df[ispseudo2, ]
+  nonpseudodf1 <- tse1df[!ispseudo1, ]
+  nonpseudodf2 <- tse2df[!ispseudo2, ]
+  
+  overlapdf <- findoverlapdf(tse1df, tse2df)
+  
+  Fiveprimend = overlapdf$tsebegin1 - overlapdf$tsebegin2
+  bad <- is.na(Fiveprimend)
+  Fiveprimend <- Fiveprimend[!bad]
+  #Difference between tse1end and tse2end
+  Threeprimend = overlapdf$tseend1 - overlapdf$tseend2
+  bad <- is.na(Threeprimend)
+  Threeprimend <- Threeprimend[!bad]
+  
+  par(mfrow = c(1, 1))
+  X = Fiveprimend
+  Y = Threeprimend
+  data <- data.frame(X, Y)
+  data = group_by(data, X, Y)
+  data = summarize(data, frequency = n())
+  data$frequency = data$frequency #/ sims
+  xbreaks <- as.integer(levels(factor(X)))
+  ybreaks <- as.integer(levels(factor(Y)))
+  total <- sum(data$frequency)
+  plottitle <- paste("Empirical joint distribution of end displacements of ", total, " TryTryp genes found by two version of tRNAscan (2.0 vs 1.3)",sep = "")
+  ggplot(data = data, aes(X, Y)) +
+    geom_tile(aes(fill = frequency), color = "white") + geom_text(aes(label = frequency)) +
+    scale_fill_gradient(low = "lightblue", high = "darkred", name = "frequency") +
+    ggtitle(
+      plottitle
+    ) + 
+    theme(plot.margin = unit(c(1.8, .5, 1.75, 1.55), "cm")) + theme(plot.title = element_text(
+      color = "#383838",
+      face = "bold",
+      size = 17,
+      vjust = 4,
+      hjust = 0.5
+    )) +
+    theme(
+      axis.title.x = element_text(
+        color = "#383838",
+        face = "bold",
+        size = 13,
+        vjust = -1.5
+      ),
+      axis.title.y = element_text(
+        color = "#383838",
+        face = "bold",
+        size = 13,
+        vjust = 2
+      )
+    ) +
+    theme(
+      axis.text.x = element_text(
+        face = "bold",
+        color = "#383838",
+        size = 10
+      ),
+      axis.text.y = element_text(
+        face = "bold",
+        color = "#383838",
+        size = 10
+      )
+    ) +
+    xlab("5' (Tse1.3-Tse2.0)") + ylab("3' (Tse1.3-Tse2.0)") + scale_y_continuous(breaks = ybreaks) +
+    scale_x_continuous(breaks = xbreaks)
+}
 # visualize_nonoverlapdfs <- function(overlaps, tse1df, tse2df) {
 #   diff_tse1_tse2 <-
 #     setdiff(seq(1, nrow(tse1df), 1), overlaps$tse1)
