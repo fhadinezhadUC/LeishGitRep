@@ -673,7 +673,7 @@ making_tse_df <- function(tse_filename, tse_ss_filename) {
 # IUPAC aa codes for the 20 elongators(A, C, E, ... , Y), X for initiators, Z for selenocysteine, $ for pseudogenes, ? for sup, # for stop and O for pyl
 #_______________________________________________________________________________________________________________________________________________________
 
-summery_table <- function() {
+summery_table <- function(integrated_tse_ara) {
   
   both <- integrated_tse_ara$foundby == "both"
   tseonly <- integrated_tse_ara$foundby == "tse"
@@ -1379,5 +1379,6 @@ summery_table <- function() {
     summerytable$O[3] <-
     tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq
   
+  summerytable
   
 }
