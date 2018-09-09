@@ -1,5 +1,4 @@
 Integrate_Tse_Ara <- function() {
-  # check for this ADWP02026113 	1	9   	76  	Undet	NNN	0	0	22.0	pseudo
   #http://www.bioconductor.org/packages/release/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesIntroduction.pdf
   #https://support.bioconductor.org/p/56123/
   library(IRanges)
@@ -10,7 +9,7 @@ Integrate_Tse_Ara <- function() {
   # read ara
   ara_filenames <-
     list.files(
-      "/home/fatemeh/Leishmania_Aug2018/genefindersScriptAndOutput/AraOutput/AraOutput_i30_ps95_rp100/",
+      "/home/fatemeh/Leishmania_Aug2018/genefindersScriptAndOutput/AraOutput/AraOutput_i116/",
       pattern = "*.ara.out",
       full.names = TRUE
     )
@@ -37,80 +36,82 @@ Integrate_Tse_Ara <- function() {
   }
   
   
-  numberofgenes = 0
-  
   aradf <- making_ara_df(ara_filenames[1])
   tsedf <-
     making_tse_df(tse_filenames[1], tse_ss_filenames[1])
   integrated_tse_ara <- integrate(aradf, tsedf)
   
   for (i in 2:length(ara_filenames)) {
-    #length(ara_filenames)
-    
     aradf <- making_ara_df(ara_filenames[i])
     tsedf <-
       making_tse_df(tse_filenames[i], tse_ss_filenames[i])
     temp_integrated <- integrate(aradf, tsedf)
     integrated_tse_ara <-
       rbind(integrated_tse_ara, temp_integrated)
-    numberofgenes = nrow(integrated_tse_ara)
-    # every round we need to rbind the old df with the new one
   }
-  print(numberofgenes)
-  formatoutput(integrated_tse_ara)
   
+  formatoutput(integrated_tse_ara)
+  integrated_tse_ara
   
 }
 
+# ____________________ formating the final integrated tse ara file with a fixed length format and write it into four file _____________________________
+
 formatoutput <- function(integrated_tse_ara) {
   # writing the dataframe in two files :
-  # file1 for coordinates: geneid, sourceOrg, sourceseq, sourceSO, direction, tse/aracoordinate /
+  # file1 for coordinates: geneid, sourceOrg, sourceseq, sourceSO, direction, tse/aracoordinate, foundby
   # file2for SS:          geneid:\n tse: tsegeneseq \n tseSS/ arageneseq, araSS /
-  # file3 for identities:  geneid, tse/araidentity, tse/araac, tseacloc, arascore/tsescore
+  # file3 for identities:  geneid, tse/araidentity, tse/araac, tseacloc, arascore/tsescore, tsenote, aranote
   # file4 for intron:      geneid, tseintroncoordinate
+
   
-  n <- data.frame("geneid",
-                  "tseintronbegin",
-                  "tseintronend")
-  names(n) <- c("geneid",
-                "tseintronbegin",
-                "tseintronend")
+  n <- data.frame("GeneId",
+                   "TseIntronBegin",
+                   "TseIntronEnd", "AraIntronLocStart","AraIntronLocEnd")
+  names(n) <- c("GeneId",
+                "TseIntronBegin",
+                "TseIntronEnd", "AraIntronLocStart","AraIntronLocEnd")
   introndf <-  data.frame(
     integrated_tse_ara$geneid,
     integrated_tse_ara$tseintronbegin,
-    integrated_tse_ara$tseintronend
+    integrated_tse_ara$tseintronend,
+    integrated_tse_ara$araintronbegin,
+    integrated_tse_ara$araintronend
   )
   names(introndf) <- names(n)
+  
   write.fwf(
     rbind(n, introndf),
-    width = c(60, 20, 20),
+    width = c(60, 20, 20,20,20),
     colnames = FALSE,
-    file = "./introns.txt"
+    file = "/home/fatemeh/Leishmania_Aug2018/Tse_Ara_Integration/Intron.txt"
   )
   
   
   n <- data.frame(
-    "geneid",
-    "sourceOrg",
-    "sourceseq",
-    "sourceSO",
-    "direction",
-    "tsebegin",
-    "tseend",
-    "arabegin",
-    "araend"
+    "GeneId",
+    "SourceOrg",
+    "SourceSeq",
+    "SourceSO",
+    "Direction",
+    "TseBegin",
+    "TseEnd",
+    "AraBegin",
+    "AraEnd",
+    "Foundby"
   )
   
   names(n) <- c(
-    "geneid",
-    "sourceOrg",
-    "sourceseq",
-    "sourceSO",
-    "direction",
-    "tsebegin",
-    "tseend",
-    "arabegin",
-    "araend"
+    "GeneId",
+    "SourceOrg",
+    "SourceSeq",
+    "SourceSO",
+    "Direction",
+    "TseBegin",
+    "TseEnd",
+    "AraBegin",
+    "AraEnd",
+    "Foundby"
   )
   coordinatedf <- data.frame(
     integrated_tse_ara$geneid,
@@ -121,40 +122,42 @@ formatoutput <- function(integrated_tse_ara) {
     integrated_tse_ara$tsebegin,
     integrated_tse_ara$tseend,
     integrated_tse_ara$arabegin,
-    integrated_tse_ara$araend
+    integrated_tse_ara$araend,
+    integrated_tse_ara$foundby
   )
   names(coordinatedf) <- names(n)
   write.fwf(
     rbind(n, coordinatedf),
     colnames = FALSE,
-    width = c(60, 35, 35, 13, 10, 10, 10, 10, 10),
-    file = "./coordinates.txt"
+    width = c(57, 32, 32, 11, 10, 10, 10, 10, 10,7),
+    file = "/home/fatemeh/Leishmania_Aug2018/Tse_Ara_Integration/Coordinate.txt"
   )
-  
   
   n <-
     data.frame(
-      "geneid",
-      "tseidentity",
-      "araidentity",
-      "tseac",
-      "araac",
-      "tseacloc",
-      "arascore",
-      "tsescore",
-      "foundby"
+      "GeneId",
+      "TseIdentity",
+      "AraIdentity",
+      "TseAc",
+      "AraAc",
+      "TseAcLoc",
+      "AraScore",
+      "TseScore",
+      "TseNote",
+      "AraNote"
     )
   names(n) <-
     c(
-      "geneid",
-      "tseidentity",
-      "araidentity",
-      "tseac",
-      "araac",
-      "tseacloc",
-      "arascore",
-      "tsescore",
-      "foundby"
+      "GeneId",
+      "TseIdentity",
+      "AraIdentity",
+      "TseAc",
+      "AraAc",
+      "TseAcLoc",
+      "AraScore",
+      "TseScore",
+      "TseNote",
+      "AraNote"
     )
   identitydf <- data.frame(
     integrated_tse_ara$geneid,
@@ -165,13 +168,14 @@ formatoutput <- function(integrated_tse_ara) {
     integrated_tse_ara$tseacloc,
     integrated_tse_ara$arascore,
     integrated_tse_ara$tsescore,
-    integrated_tse_ara$foundby
+    integrated_tse_ara$tsenote,
+    integrated_tse_ara$aranote
   )
   names(identitydf) <- names(n)
   write.fwf(
     rbind(n, identitydf),
-    width = c(60, 12, 12, 15, 15, 12, 12, 12, 10),
-    file = "./identities.txt",
+    width = c(58, 12, 12, 15, 15, 12, 12, 12, 10,10),
+    file = "/home/fatemeh/Leishmania_Aug2018/Tse_Ara_Integration/Identity.txt",
     colnames = FALSE
   )
   
@@ -184,7 +188,7 @@ formatoutput <- function(integrated_tse_ara) {
       paste("arass:  ", integrated_tse_ara$arageness, sep = ""),
       character(length = length(integrated_tse_ara$arageness))
     ),
-    file = "./secondaryS.txt",
+    file = "/home/fatemeh/Leishmania_Aug2018/Tse_Ara_Integration/SecondaryS.txt",
     sep = "\n",
     colnames = FALSE
   )
@@ -192,6 +196,8 @@ formatoutput <- function(integrated_tse_ara) {
   
   
 }
+
+# ___________________ integrate (union) genes found by tse and ara into integrated_tse_ara dataframe __________________________________________________
 
 integrate <- function(aradf, tsedf) {
   aradf$arabegin <- as.integer(as.character(aradf$arabegin))
@@ -232,18 +238,17 @@ integrate <- function(aradf, tsedf) {
     )
   overlapps <- as.data.frame(findOverlaps(ara, tse))
   names(overlapps) <- c("ararecord", "tserecord")
-  # making a dataframe for binding two dataframes
   m <- matrix(ncol = ncol(aradf) + ncol(tsedf), nrow = 1)
   overlapdf <- as.data.frame(m)
   names(overlapdf) <- c(names(aradf), names(tsedf))
   for (i in 1:nrow(overlapps)) {
     tempbind <-
-      as.data.frame(c(aradf[overlapps$ararecord[i],], tsedf[overlapps$tserecord[i],]))
+      as.data.frame(c(aradf[overlapps$ararecord[i], ], tsedf[overlapps$tserecord[i], ]))
     overlapdf <- rbind(tempbind, overlapdf)
   }
   integrated_gene_file <- overlapdf
   integrated_gene_file <-
-    integrated_gene_file[1:(nrow(integrated_gene_file) - 1), ]
+    integrated_gene_file[1:(nrow(integrated_gene_file) - 1),]
   integrated_gene_file$foundby <- "both"
   
   # dealing with those that do not have overlapps
@@ -255,7 +260,7 @@ integrate <- function(aradf, tsedf) {
   if (length(diff_ara_tse) > 0)
     for (i in 1:length(diff_ara_tse)) {
       tempbind <-
-        as.data.frame(c(aradf[diff_ara_tse[i],], rep("notfound", ncol(tsedf)), "ara"))
+        as.data.frame(c(aradf[diff_ara_tse[i], ], rep("notfound", ncol(tsedf)), "ara"))
       names(tempbind) <- names(integrated_gene_file)
       tempbind$tsebegin = -1
       tempbind$tseend = -1
@@ -264,7 +269,7 @@ integrate <- function(aradf, tsedf) {
   if (length(diff_tse_ara) > 0)
     for (i in 1:length(diff_tse_ara)) {
       tempbind <-
-        as.data.frame(c(rep("notfound", ncol(aradf)), tsedf[diff_tse_ara[i],], "tse"))
+        as.data.frame(c(rep("notfound", ncol(aradf)), tsedf[diff_tse_ara[i], ], "tse"))
       names(tempbind) <- names(integrated_gene_file)
       tempbind$arabegin = -1
       tempbind$araend = -1
@@ -356,7 +361,7 @@ integrate <- function(aradf, tsedf) {
     integrated_tse_ara$sourceOrg,
     integrated_tse_ara$sourceseq,
     integrated_tse_ara$arabegin
-  ), ]
+  ),]
   
   for (i in 1:nrow(integrated_tse_ara)) {
     integrated_tse_ara$geneid[i] = paste(integrated_tse_ara$sourceOrg[i],
@@ -366,9 +371,11 @@ integrate <- function(aradf, tsedf) {
   }
   
   integrated_tse_ara
-  # change the sourceorg for ara and make it from file name
-  
+
 }
+
+#_____________________ reading one the aragorn's output  (one file) and return its info as aradf dataframe ____________________________________________
+
 making_ara_df <- function(arafilename) {
   namearray <- unlist(strsplit(arafilename, split = "/"))
   nameorg <- namearray[length(namearray)]
@@ -529,11 +536,12 @@ making_ara_df <- function(arafilename) {
     }
   }
   close(con)
-  geneinfo <- geneinfo[2:nrow(geneinfo),]
+  geneinfo <- geneinfo[2:nrow(geneinfo), ]
   geneinfo
 }
 
-# tse also reports introns. a possible intron
+#_____________________ reading one the tRNAscan's output  (one file) and return its info as tsedf dataframe ___________________________________________
+
 making_tse_df <- function(tse_filename, tse_ss_filename) {
   # extracting the sourceOrg from filemame
   namearray <- unlist(strsplit(tse_filename, split = "/"))
@@ -651,28 +659,38 @@ making_tse_df <- function(tse_filename, tse_ss_filename) {
   }
   close(con)
   close(con2)
-  geneinfo <- geneinfo[2:nrow(geneinfo), ]
+  geneinfo <- geneinfo[2:nrow(geneinfo),]
   geneinfo
 }
 
-summery_table() <- function() {
+#______________________________________________________________________________________________________________________________________________________
+# making a dataframe table with the four rows for each geneset of:
+# 1. tse2
+# 2. ARA
+# 3. Union(tse2,ARA)
+# 4. Intersection(tse2,ARA)
+# with 35 columns for  T (#trnas), N (#nucleotides), N/T, length range, %G, %C, %T, %A, %intron-containing, and the 23 class frequencies including 
+# IUPAC aa codes for the 20 elongators(A, C, E, ... , Y), X for initiators, Z for selenocysteine, $ for pseudogenes, ? for sup, # for stop and O for pyl
+#_______________________________________________________________________________________________________________________________________________________
+
+summery_table <- function() {
+  
   both <- integrated_tse_ara$foundby == "both"
   tseonly <- integrated_tse_ara$foundby == "tse"
   araonly <- integrated_tse_ara$foundby == "ara"
   
-  # genes found by tse
   istse <- (tseonly | both)
   isara <- (araonly | both)
   isintersect_tse_ara <- both
   
-  tse <- integrated_tse_ara[istse, ]
-  ara <- integrated_tse_ara[isara, ]
-  intersect_tse_ara <- integrated_tse_ara[isintersect_tse_ara, ]
+  tse <- integrated_tse_ara[istse,]
+  ara <- integrated_tse_ara[isara,]
+  intersect_tse_ara <- integrated_tse_ara[isintersect_tse_ara,]
   union_tse_ara <- integrated_tse_ara
   
-  # making a 4 * 32 size dataframe
+  # making a 4 * 36 size dataframe
   m <- matrix(nrow = 4,
-              ncol = 33,
+              ncol = 36,
               data = 0)
   summerytable <- as.data.frame(m)
   names(summerytable) <-
@@ -709,8 +727,12 @@ summery_table() <- function() {
       "Y",
       "X",
       "Z",
-      "$"
+      "$",
+      "?",
+      "#",
+      "O"
     )
+  
   summerytable[, 1] <- c("TSE2", "ARA", "UNION", "INTERSECTION")
   summerytable[, 2] <-
     c(nrow(tse),
@@ -741,7 +763,8 @@ summery_table() <- function() {
   summerytable[, 5] <-
     c(tserange, ararange, unionrange, intersectionrange)
   
-  # A T C G percentage
+  #_____________________ A T C G percentage ______________________________
+
   tse$tsegeneseq <- tolower(tse$tsegeneseq)
   count <-
     sapply(c("a", "g", "c", "t"), function(nuc)
@@ -814,17 +837,17 @@ summery_table() <- function() {
   
   # araintronbegin is the location of the intron in the tRNA gene not genome!
   arahasintron <- ara$araintronbegin != "nointron"
-  nrow(ara[arahasintron, ])
+  nrow(ara[arahasintron,])
   
   tsehasintron <-
     (tse$tseintronbegin != "0" & tse$tseintronbegin != "notfound")
-  nrow(tse[tsehasintron, ])
+  nrow(tse[tsehasintron,])
   
   intersecthasintron <-
     ((intersect_tse_ara$tseintronbegin == "0") &
        (intersect_tse_ara$araintronbegin == "nointron")
     )
-  nrow(intersect_tse_ara[!intersecthasintron, ])
+  nrow(intersect_tse_ara[!intersecthasintron,])
   
   
   unionhasintron <-
@@ -832,26 +855,26 @@ summery_table() <- function() {
         (union_tse_ara$tseintronbegin == "notfound")
     ) &
       (union_tse_ara$araintronbegin == "nointron"))
-  nrow(union_tse_ara[!unionhasintron,])
+  nrow(union_tse_ara[!unionhasintron, ])
   
   summerytable[, 10] <-
     c(
-      nrow(tse[tsehasintron,]) * 100 / nrow(tse),
-      nrow(ara[arahasintron,]) * 100 / nrow(ara),
-      nrow(union_tse_ara[!unionhasintron,]) * 100 / nrow(union_tse_ara),
-      nrow(intersect_tse_ara[!intersecthasintron, ]) * 100 / nrow(intersect_tse_ara)
+      nrow(tse[tsehasintron, ]) * 100 / nrow(tse),
+      nrow(ara[arahasintron, ]) * 100 / nrow(ara),
+      nrow(union_tse_ara[!unionhasintron, ]) * 100 / nrow(union_tse_ara),
+      nrow(intersect_tse_ara[!intersecthasintron,]) * 100 / nrow(intersect_tse_ara)
     )
   
   #______________________ pseudo frequency ______________________________________
   
-  tsepseudo <- tse[tse$tsenote == "pseudo", ]
-  arapseudo <- ara[ara$aranote == "pseudo", ]
+  tsepseudo <- tse[tse$tsenote == "pseudo",]
+  arapseudo <- ara[ara$aranote == "pseudo",]
   intersectpseudo <-
     intersect_tse_ara[intersect_tse_ara$tsenote == "pseudo" |
-                        intersect_tse_ara$aranote == "pseudo",]
+                        intersect_tse_ara$aranote == "pseudo", ]
   unionpseudo <-
     union_tse_ara[union_tse_ara$tsenote == "pseudo" |
-                    union_tse_ara$aranote == "pseudo",]
+                    union_tse_ara$aranote == "pseudo", ]
   summerytable[, 33] <-
     c(nrow(tsepseudo),
       nrow(arapseudo),
@@ -861,6 +884,7 @@ summery_table() <- function() {
   
   
   #___________________ Aminoacid frequency ________________________________________
+  
   aminoacid <- character(length = nrow(tse))
   # frequency 23 classes
   for (i in 1:nrow(tse)) {
@@ -915,59 +939,76 @@ summery_table() <- function() {
         "Z"
     if (id == "stop")
       aminoacid[i] <-
-        "stop"
+        "#"
+    if (id == "sup")
+      aminoacid[i] <-
+        "?"
+    if (id == "pyl")
+      aminoacid[i] <-
+        "O"
     
   }
   
   tseaminoacid <- data.frame(table(aminoacid))
   summerytable$A[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "A",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "A", ]$Freq
   summerytable$C[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "C",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "C", ]$Freq
   summerytable$D[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "D",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "D", ]$Freq
   summerytable$E[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "E",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "E", ]$Freq
   summerytable$F[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "F",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "F", ]$Freq
   summerytable$G[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "G",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "G", ]$Freq
   summerytable$H[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "H",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "H", ]$Freq
   summerytable$I[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "I",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "I", ]$Freq
   summerytable$K[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "K",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "K", ]$Freq
   summerytable$L[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "L",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "L", ]$Freq
   summerytable$M[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "M",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "M", ]$Freq
   summerytable$N[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "N",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "N", ]$Freq
   summerytable$P[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "P",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "P", ]$Freq
   summerytable$Q[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Q",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Q", ]$Freq
   summerytable$R[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "R",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "R", ]$Freq
   summerytable$S[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "S",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "S", ]$Freq
   summerytable$T[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "T",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "T", ]$Freq
   summerytable$V[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "V",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "V", ]$Freq
   summerytable$W[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "W",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "W", ]$Freq
   summerytable$Y[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Y",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Y", ]$Freq
   #summerytable$X[1]<-tseaminoacid[tseaminoacid$aminoacid=="X",]$Freq
   summerytable$Z[1] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Z",]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Z", ]$Freq
+  
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq) != 0)
+    summerytable$`#`[1] <-
+    tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq) != 0)
+    summerytable$`?`[1] <-
+    tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq) != 0)
+    summerytable$O[1] <-
+    tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq
   
   
   
   
-  #####################################################################
+  #____________________________________________________________________
+  
   aminoacid <- character(length = nrow(ara))
   # frequency 23 classes
   for (i in 1:nrow(ara)) {
@@ -1022,58 +1063,73 @@ summery_table() <- function() {
         "Z"
     if (id == "stop")
       aminoacid[i] <-
-        "stop"
+        "#"
+    if (id == "sup")
+      aminoacid[i] <-
+        "?"
+    if (id == "pyl")
+      aminoacid[i] <-
+        "O"
     
   }
   
   tseaminoacid <- data.frame(table(aminoacid))
   summerytable$A[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "A", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "A",]$Freq
   summerytable$C[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "C", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "C",]$Freq
   summerytable$D[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "D", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "D",]$Freq
   summerytable$E[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "E", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "E",]$Freq
   summerytable$F[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "F", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "F",]$Freq
   summerytable$G[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "G", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "G",]$Freq
   summerytable$H[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "H", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "H",]$Freq
   summerytable$I[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "I", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "I",]$Freq
   summerytable$K[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "K", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "K",]$Freq
   summerytable$L[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "L", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "L",]$Freq
   summerytable$M[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "M", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "M",]$Freq
   summerytable$N[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "N", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "N",]$Freq
   summerytable$P[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "P", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "P",]$Freq
   summerytable$Q[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Q", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Q",]$Freq
   summerytable$R[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "R", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "R",]$Freq
   summerytable$S[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "S", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "S",]$Freq
   summerytable$T[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "T", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "T",]$Freq
   summerytable$V[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "V", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "V",]$Freq
   summerytable$W[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "W", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "W",]$Freq
   summerytable$Y[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Y", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Y",]$Freq
   #summerytable$X[1]<-tseaminoacid[tseaminoacid$aminoacid=="X",]$Freq
   summerytable$Z[2] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Z", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Z",]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq) != 0)
+    summerytable$`#`[2] <-
+    tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq) != 0)
+    summerytable$`?`[2] <-
+    tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq) != 0)
+    summerytable$O[2] <-
+    tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq
   
   
+  #____________________________________________________________________
   
-  #####################################################################
   aminoacid <- character(length = nrow(integrated_tse_ara))
   # frequency 23 classes
   for (i in 1:nrow(intersect_tse_ara)) {
@@ -1129,58 +1185,75 @@ summery_table() <- function() {
         "Z"
     if (id == "stop")
       aminoacid[i] <-
-        "stop"
+        "#"
+    if (id == "sup")
+      aminoacid[i] <-
+        "?"
+    if (id == "pyl")
+      aminoacid[i] <-
+        "O"
     
   }
   
   tseaminoacid <- data.frame(table(aminoacid))
   summerytable$A[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "A", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "A",]$Freq
   summerytable$C[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "C", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "C",]$Freq
   summerytable$D[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "D", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "D",]$Freq
   summerytable$E[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "E", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "E",]$Freq
   summerytable$F[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "F", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "F",]$Freq
   summerytable$G[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "G", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "G",]$Freq
   summerytable$H[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "H", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "H",]$Freq
   summerytable$I[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "I", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "I",]$Freq
   summerytable$K[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "K", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "K",]$Freq
   summerytable$L[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "L", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "L",]$Freq
   summerytable$M[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "M", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "M",]$Freq
   summerytable$N[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "N", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "N",]$Freq
   summerytable$P[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "P", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "P",]$Freq
   summerytable$Q[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Q", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Q",]$Freq
   summerytable$R[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "R", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "R",]$Freq
   summerytable$S[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "S", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "S",]$Freq
   summerytable$T[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "T", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "T",]$Freq
   summerytable$V[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "V", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "V",]$Freq
   summerytable$W[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "W", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "W",]$Freq
   summerytable$Y[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Y", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Y",]$Freq
   #summerytable$X[1]<-tseaminoacid[tseaminoacid$aminoacid=="X",]$Freq
   summerytable$Z[4] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Z", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Z",]$Freq
+  tseaminoacid <- data.frame(table(aminoacid))
+  
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq) != 0)
+    summerytable$`#`[4] <-
+    tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq) != 0)
+    summerytable$`?`[4] <-
+    tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq) != 0)
+    summerytable$O[4] <-
+    tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq
   
   
   
-  #####################################################################
+  #____________________________________________________________________
   
   aminoacid <- character(length = nrow(union_tse_ara))
   unionidentity <- union_tse_ara$tseidentity
@@ -1242,53 +1315,69 @@ summery_table() <- function() {
         "Z"
     if (id == "stop")
       aminoacid[i] <-
-        "stop"
+        "#"
+    if (id == "sup")
+      aminoacid[i] <-
+        "?"
+    if (id == "pyl")
+      aminoacid[i] <-
+        "O"
     
   }
   
   tseaminoacid <- data.frame(table(aminoacid))
   summerytable$A[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "A", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "A",]$Freq
   summerytable$C[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "C", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "C",]$Freq
   summerytable$D[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "D", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "D",]$Freq
   summerytable$E[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "E", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "E",]$Freq
   summerytable$F[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "F", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "F",]$Freq
   summerytable$G[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "G", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "G",]$Freq
   summerytable$H[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "H", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "H",]$Freq
   summerytable$I[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "I", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "I",]$Freq
   summerytable$K[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "K", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "K",]$Freq
   summerytable$L[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "L", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "L",]$Freq
   summerytable$M[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "M", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "M",]$Freq
   summerytable$N[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "N", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "N",]$Freq
   summerytable$P[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "P", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "P",]$Freq
   summerytable$Q[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Q", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Q",]$Freq
   summerytable$R[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "R", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "R",]$Freq
   summerytable$S[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "S", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "S",]$Freq
   summerytable$T[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "T", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "T",]$Freq
   summerytable$V[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "V", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "V",]$Freq
   summerytable$W[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "W", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "W",]$Freq
   summerytable$Y[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Y", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Y",]$Freq
   #summerytable$X[1]<-tseaminoacid[tseaminoacid$aminoacid=="X",]$Freq
   summerytable$Z[3] <-
-    tseaminoacid[tseaminoacid$aminoacid == "Z", ]$Freq
+    tseaminoacid[tseaminoacid$aminoacid == "Z",]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq) != 0)
+    summerytable$`#`[3] <-
+    tseaminoacid[tseaminoacid$aminoacid == "#", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq) != 0)
+    summerytable$`?`[3] <-
+    tseaminoacid[tseaminoacid$aminoacid == "?", ]$Freq
+  if (length(tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq) != 0)
+    summerytable$O[3] <-
+    tseaminoacid[tseaminoacid$aminoacid == "O", ]$Freq
+  
   
 }
