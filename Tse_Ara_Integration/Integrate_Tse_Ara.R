@@ -182,7 +182,7 @@ formatoutput <- function(integrated_tse_ara) {
   names(identitydf) <- names(n)
   write.fwf(
     rbind(n, identitydf),
-    width = c(58, 12, 12, 15, 15, 12, 12, 12, 10, 10),
+    width = c(58, 12, 12, 15, 15, 12, 12, 12, 32, 10),
     file = "/home/fatemeh/Leishmania_Aug2018/Tse_Ara_Integration/Identity.txt",
     colnames = FALSE
   )
@@ -642,6 +642,15 @@ making_tse_df <- function(tse_filename, tse_ss_filename) {
         tsegeneseq <- unlist(strsplit(l, split = "\\s+"))[2]
       if (unlist(strsplit(l, split = "\\s+"))[1] == "Str:")
         tsegeness <- unlist(strsplit(l, split = "\\s+"))[2]
+      if(unlist(strsplit(l, split = "\\s+"))[1] == "Possible")
+        if( length(grep("truncation",unlist(strsplit(l, split = "\\s+"))[2] ))  !=0 )
+        {
+          if(note=="notfound")
+            note="truncated"
+          else
+            note <- paste("truncated",note, sep = ",") 
+        }
+        
     }
     
     tempdf <-

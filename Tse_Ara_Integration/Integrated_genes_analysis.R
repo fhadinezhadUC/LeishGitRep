@@ -112,4 +112,5 @@ visualization <- function() {
 # check how many of those that do not have intron 
 # all the genes that have undertermind identity have no introns 
 
+# looking at genes found by just tse 
 
