@@ -1,0 +1,28 @@
+Install the requirements for tsfm: https://github.com/tlawrence3/tsfm/blob/master/requirements.txt
+Install tsfm using this command: 
+sudo apt install python3-pip
+pip3 install tsfm
+Install covea-2.4.4 (rename the getline function in file sqio.c to my_getline)
+
+
+run the fallowing scripts:
+A) remove_intron_Variablearm.R: Remove introns and variable arm
+1. precprocessing (Limits for genes used): a) intersection of TSE and ARA. b) nonpseudo by both tse and ara. c) have 4 arms or 5 (including variable arm)  
+2. Keep the Aminoacid class as the last part of gene ID and Mark initiators).  
+3. Remove the introns and variable arms and save the result in file Integrated_Genes_NoVarIntron.fasta 
+
+B) Run covea with the fallowing command: 
+covea TRNA2-euk.cm Integrated_Genes_NoVarIntron.fasta > Trytryp_genes_NoVarIntron.covea
+
+C) coveaProcessing.R: Editing the Trytryp_genes_NoVarIntron.covea file
+1. reading the aligned sequences in "seqDB" dataframe and secondary structures in "SSDB" and saving them in files: coveaDF.txt and coveaDF_SS.txt. Also, save the CS line in struct_file.txt
+2. Removing sites that have more than 99% gap (removing rows in seqDB dataframe that have more than 99% ".")
+3. Removing genes that have more than 8 gaps in their aligned sequence
+4. Save the Edited covea file in EditedCovea.covea file. Also as a fasta file (with "."s replaced with "-") in EditedCovea.fasta to be converted to clustal format for tsfm
+5. Split the EditedCovea.fasta based on their Amoinoacid class and convert the splited files to clustalW format using fasgrep in splitFuncClass.sh script
+
+Run tsfm with the fallowing command:
+
+export PATH="~/.local/bin:$PATH"
+tsfm --logo -c /home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput/struct_file.txt /home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput/clustalW/TryTryp 
+
