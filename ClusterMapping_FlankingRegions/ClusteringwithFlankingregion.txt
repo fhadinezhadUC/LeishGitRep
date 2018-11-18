@@ -6,8 +6,8 @@
 
 5. function genomeDistance() in ClusterMapping.R will read all the pairwise alignments, then maps clusters of each pair of genomes. (a cluster will be mapped to another cluster if it is in its tight anchor(flanking region))
 
-Distance between two genomes G1 and G2 =  (number of clusters in G1 which has a cluster anchor in G2) 
-                                        + (number of clusters in G2 which has a cluster anchor in G1)
+Distance between two genomes G1 and G2 =  (Percentage of clusters in G1 which has a cluster anchor in G2) 
+                                        + (Percentage of clusters in G2 which has a cluster anchor in G1)
                                          _____________________________________________________________
 									2
 
