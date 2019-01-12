@@ -1,0 +1,48 @@
+Install the requirements for tsfm: https://github.com/tlawrence3/tsfm/blob/master/requirements.txt
+Install tsfm using this command: 
+sudo apt install python3-pip
+pip3 install tsfm
+Install covea-2.4.4 (rename the getline function in file sqio.c to my_getline)
+
+Script remove_intron_Variablearm.R
+1. Limits for genes used: intersection of TSE and ARA, nonpseudo by both tse and ara, have 4 arms or 5 (including variable arm)  
+2. Keep tha Aminoacid class as the last part of gene ID (Mark initiators as well).  
+3. Remove the introns and variable arms and save the result in file Integrated_Genes_NoVarIntron.fasta 
+
+4. Run covea with the fallowing command: 
+covea TRNA2-euk.cm Integrated_Genes_NoVarIntron.fasta > Trytryp_genes_NoVarIntron.covea
+
+Script coveaProcessing.R
+Editing the Trytryp_genes.covea file:
+
+5. reading the aligned sequences in seqDB dataframe and secondary structures in SSDB and saving them in files: coveaDF.txt and coveaDF_SS.txt. Also, save the CS line in struct_file.txt
+6. Removing sites that have more than 99% gap (removing rows in seqDB dataframe that have more than 99% ".")
+7. Removing genes that have more than 8 gaps in their aligned sequence
+8. Save the Edited covea file in EditedCovea.covea file. Also as a fasta file (with "."s replaced with "-") in EditedCovea.fasta to be converted to clustal format for tsfm
+9. Split the EditedCovea.fasta based on their Amoinoacid class and convert the splited files to clustalW format using fasgrep in splitFuncClass.sh script
+
+Run tsfm with the fallowing command:
+
+export PATH="~/.local/bin:$PATH"
+tsfm --logo -c /home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput/struct_file.txt /home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput/clustalW/TryTryp 
+
+#_______________________________________________________________________________________________
+
+In order to generate ID logos and KLDs for Leishmania and HomoC genes we need to align both tRNA sequences together 
+
+I used EditedCovea.fasta file which is the aligned and edited gene file of leishmania + the HomoC_reduced.fas file.
+
+1. merged both fasta files 
+cat EditedCovea.fasta HomoC_reduced.fas > LeishmaniaHomoC.fasta
+
+2. covea TRNA2-euk.cm LeishmaniaHomoC.fasta > LeishmaniaHomoC.covea
+
+3. Using the script coveaProcessing.R edit LeishmaniaHomoC.covea
+
+4. extract the Homo file 
+
+
+
+
+
+

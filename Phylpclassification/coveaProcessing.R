@@ -2,9 +2,9 @@ coveaProcessing <- function() {
   readSeqsIntoDf()
   library(readr)
   seqDB <-
-    read_csv("/home/fatemeh/Leishmania_Aug2018/phyloclassification/coveaDF.txt")
+    read_csv("/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/HomoTryTryp_coveaDF.txt")
   SSDB <-
-    read_csv("/home/fatemeh/Leishmania_Aug2018/phyloclassification/coveaDF_SS.txt")
+    read_csv("/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/HomoTryTryp_coveaDF_SS.txt")
   editAlignment(seqDB, SSDB)
   
   
@@ -18,7 +18,7 @@ readSeqsIntoDf <- function()
     grep(
       "#=CS +",
       readLines(
-        "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea"
+        "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/LeishmaniaHomoC.covea"#"/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea" #
       ),
       value = TRUE
     )
@@ -32,7 +32,7 @@ readSeqsIntoDf <- function()
   SQs <- grep(
     "#=SQ +",
     readLines(
-      "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea"
+      "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/LeishmaniaHomoC.covea"#"/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea" #
     ),
     value = TRUE
   )
@@ -52,7 +52,7 @@ readSeqsIntoDf <- function()
       grep(
         pattern = pat,
         readLines(
-          "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea"
+          "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/LeishmaniaHomoC.covea" #"/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea"#
         ),
         value = TRUE
       )
@@ -74,7 +74,7 @@ readSeqsIntoDf <- function()
   SSs <- grep(
     "#=SS +",
     readLines(
-      "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea"
+      "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/LeishmaniaHomoC.covea"#"/home/fatemeh/Leishmania_Aug2018/phyloclassification/Trytryp_genes_NoVarIntron.covea"#
     ),
     value = TRUE
   )
@@ -100,8 +100,8 @@ readSeqsIntoDf <- function()
   }
   
   library(readr)
-  write_csv(seqDB, path  = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/coveaDF.txt")
-  write_csv(SSDB, path  = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/coveaDF_SS.txt")
+  write_csv(seqDB, path  = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/HomoTryTryp_coveaDF.txt")
+  write_csv(SSDB, path  = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/HomoTryTryp_coveaDF_SS.txt")
   
   
 }
@@ -129,7 +129,7 @@ writeCovea <- function(SSDB, seqDB) {
     data.frame(mynames,
                coveaseqs,
                coveass),
-    file = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/EditedCovea.covea",
+    file = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/HomoTryTryp_EditedCovea.covea",
     sep = "\n",
     colnames = FALSE
   )
@@ -138,11 +138,13 @@ writeCovea <- function(SSDB, seqDB) {
   library(Hmisc)
   for (i in 1:length(coveaseqs)) {
     coveaseqs[i] <- translate(coveaseqs[i], "[.]", "-")
+    #coveaseqs[i] <- translate(coveaseqs[i], "[n]", "-")
+    #coveaseqs[i] <- translate(coveaseqs[i], "[N]", "-")
   }
   write.fwf(
     data.frame(paste(">", mynames, sep = ""),
                coveaseqs),
-    file = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/EditedCovea.fasta",
+    file = "/home/fatemeh/Leishmania_Aug2018/phyloclassification/Leishmania_HomoC/HomoTryTryp_EditedCovea.fasta",
     sep = "\n",
     colnames = FALSE
   )
@@ -168,7 +170,7 @@ editAlignment <- function(seqDB, SSDB) {
         gapperc <-
           (temp[temp$Var1 == "TRUE", 2] / (temp[temp$Var1 == "TRUE", 2] + temp[temp$Var1 ==
                                                                                  "FALSE", 2])) * 100
-        if (gapperc >= 99)
+        if (gapperc > 97)
         {
           delpos = c(delpos, i)
         }
@@ -189,6 +191,7 @@ editAlignment <- function(seqDB, SSDB) {
   
   # remove sequences with more than 8 gaps!
   delpos = " "
+  flag=0
   for (i in 1:ncol(seqDB)) {
     temp <- data.frame(table(seqDB[, i] == "."))
     if (length(temp[temp$Var1 == "TRUE", 2]) != 0)
@@ -197,6 +200,16 @@ editAlignment <- function(seqDB, SSDB) {
         if (names(seqDB[, i]) != "CS")
           delpos = c(delpos, i)
       }
+    for (x in 1:length(unlist(seqDB[,i]))) {
+      if(unlist(seqDB[,i])[x]=="n" | unlist(seqDB[,i])[x]=="N" )
+        flag=1
+    }
+    if(flag == 1)
+    {
+      print("shit")
+      delpos = c(delpos, i)
+      flag = 0
+    }
   }
   if (length(delpos) > 1)
   {
