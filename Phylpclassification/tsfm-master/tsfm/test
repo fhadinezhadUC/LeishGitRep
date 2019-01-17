@@ -1,0 +1,17 @@
+def myf()
+        for single in basepairs:
+            for state in pairs:
+                for p in height_f[single][state]:
+                    if p in height_b[single][state] and height_b[single][state][p] != 0:
+                        id_height[single][state][p] = (height_f[single][state][p] /
+                                                       height_b[single][state][p])
+                    else:
+                        id_height[single][state][p] = height_f[single][state][p]
+                # there is nothing for state -
+                summ = sum(id_height[single][state].values())
+                for p in id_height[single][state]:
+                    if summ != 0:
+                        id_height[single][state][p] = id_height[single][state][p] * info[single][state] / summ
+                    else:
+                        # print(single, state, " sum is zero in pairs !!!!!!!!!!!!!")
+                        id_height[single][state][p] = 0

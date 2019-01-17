@@ -1,0 +1,39 @@
+
+exact is calculated when number of sequences within a stack is less than n (which is 10 here by default):
+in this case we make a list of length 10 which has these tuples 
+(index, p(y), number of functions in general not just that stack) 
+
+
+
+
+
+(i, p, len(self.functions.values()) 
+
+i = 1-10 for n
+p = is the p(y) in general not just that stack!
+
+
+function calc_exact calculates 10 numbers from: 
+
+[(1, [0.05718954248366013,
+ 0.032679738562091505, 
+0.0457516339869281,
+ 0.05555555555555555,
+ 0.07516339869281045,
+ 0.016339869281045753,
+ 0.027777777777777776,
+ 0.058823529411764705,
+ 0.016339869281045753, 
+0.027777777777777776, 0.014705882352941176, 0.049019607843137254, 0.08823529411764706, 0.07516339869281045, 0.05228758169934641, 0.017973856209150325, 0.05228758169934641, 0.07026143790849673, 0.06045751633986928, 0.03594771241830065, 0.07026143790849673], 21)
+
+
+I don't understand two things: 
+1. how do you exactly calculate the exacts from this tuples (index{1:10}, p(function), number of functions in general) which I should probably read the paper about exact method~
+2. expected_bg_entropy - fg_entropy 
+
+you are calculating H(X)- H(X|y) in general which makes sense But,
+ you calculate H(x|y) - e(n) when frequecy of sequences within a stack is less than 10 ? I thoght this is the formula H(X)-H(X|y) - e(n)
+
+so are you saying that I should calculate expected_bg_entropy - fg_entropy like you 
+
+so for kld, if the frequency is less than n within a stack, I should subtract the kld by only self.exact[sum(state_counts.values()) - 1] 
