@@ -1,0 +1,6 @@
+split the TryTryp gene file for each genome first, then split each of them based on the finctional class, and generate the clustal format.
+split the genes based on the first part of the IDs.
+
+
+
+
