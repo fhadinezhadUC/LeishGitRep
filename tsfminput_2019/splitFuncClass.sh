@@ -19,9 +19,7 @@ for item in ${array[*]}
 do
     printf "   %s\n" $item
     cat "$ref" | fasgrep "_${item}$" > "/home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput_2019/tRNADB/$ref3/${item}.fasta"
-    
-    
-    cat "/home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput_2019/tRNADB/$ref3/${item}.fasta" | fasconvert -o clustalw > "/home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput_2019/tRNADB/$ref3/clustalW/$ref3_${item}.aln"
+    cat "/home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput_2019/tRNADB/$ref3/${item}.fasta" | fasconvert -o clustalw > "/home/fatemeh/Leishmania_Aug2018/phyloclassification/tsfminput_2019/tRNADB/$ref3/clustalW/${ref3}_${item}.aln"
   
 
 done

@@ -112,6 +112,8 @@ vidualization <- function(genome_list) {
   ggsave(paste(plotpath, "tRNAcounts.png", sep = ""),
          width = 14,
          height = 7)
+  
+  
   # plot genomes vs percentage of 21 functional classes they contain
   
   tRNAcountdf$genome <-
@@ -122,12 +124,12 @@ vidualization <- function(genome_list) {
     print(i)
     if (names(genome_list[i]) != "HOMO")
     {
+      # remove function Z for now
+      isZ <- genome_list[[i]]$funclass=="Z"
+      genome_list[[i]] <- genome_list[[i]][!isZ,]
       countsdf <-
         as.data.frame(table(as.character(genome_list[[i]]$funclass)))
       fcount <- nrow(countsdf)
-      if (nrow(countsdf) == 22) {
-        fcount <- 21
-      }
       tRNAcountdf[tRNAcountdf$genome == names(genome_list[i]),]$percent_21 <-
         (fcount / 21) * 100
     }
