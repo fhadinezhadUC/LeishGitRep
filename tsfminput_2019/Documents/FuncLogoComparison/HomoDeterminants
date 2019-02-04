@@ -1,0 +1,32 @@
+HomoC determinants: 
+
+
+antideterminants:
+
+state C 
+pos 8: Only HomoC does not have function V.
+pos 9: only HomoC does not have L|S
+pos 16: Homoc does not have anything
+
+pos 18: only homoc has L,E
+pos 22: TryTryp all have S, HomoC has nothing
+pos 24: only homoc has W,functions, TryTryp has nothing
+pos 73: only HomoC does not have P
+
+State G
+pos 16: only homoc has F others have nothing (for function F tRNAs only HomoC has G)
+pos 20: only homoC has functions
+pos 25: TryTryp manly have L/S but Homo does not
+pos 48: only homoc has functions
+pos 55: only homomc has N and P
+pos 60: only homoc has A/Y/T others have nothing
+
+state U
+
+pos 48: only Homo does not have E
+pos 49: TryTryp mainly A/V. HomoC other stuff
+pos 52: only AfricanT has V and A, others have nothing. HomoC has mainly W
+pos 58: only homoc has functions
+pos 73: only homoc does not have H
+
+
