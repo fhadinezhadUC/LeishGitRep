@@ -241,7 +241,7 @@ vidualization <- function(genome_list) {
     ) + theme(axis.text.x = element_text(angle = 90, hjust = 1),
               plot.title = element_text(hjust = 0.5)) +
     labs(title =
-           "Number of tRNA genes in HomoC and TryTryp genomes",
+           "Number of tRNA genes in HomoC and TryTryp clusters",
          x =
            "Genome", y = "Number of tRNAs")
   p
@@ -321,7 +321,7 @@ vidualization <- function(genome_list) {
     geom_bar(stat = "identity", fill = "#56B4E9")  + theme(axis.text.x = element_text(angle = 90, hjust = 1),
                                                            plot.title = element_text(hjust = 0.5)) +
     labs(title =
-           "Percentage of 21 tRNA functional classes covered by each genome",
+           "Percentage of 21 tRNA functional classes covered by each cluster",
          x =
            "Genome", y = "Percentage of tRNA functional classes(total=21)") + geom_text(
              aes(label =
